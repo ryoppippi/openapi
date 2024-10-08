@@ -299,7 +299,7 @@ export namespace OpenApiV3_1 {
     }
 
     export interface IArray extends __ISignificant<"array"> {
-      items: IJsonSchema | IJsonSchema[];
+      items?: IJsonSchema | IJsonSchema[];
       prefixItems?: IJsonSchema[];
       uniqueItems?: boolean;
       additionalItems?: boolean | IJsonSchema;
@@ -328,6 +328,8 @@ export namespace OpenApiV3_1 {
       title?: string;
       description?: string;
       deprecated?: boolean;
+      example?: any;
+      examples?: Record<string, any>;
     }
   }
 
