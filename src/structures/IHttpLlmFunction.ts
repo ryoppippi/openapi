@@ -19,11 +19,7 @@ import { IValidation } from "./IValidation";
  *
  * For reference, different between `IHttpLlmFunction` and its origin source
  * {@link OpenApi.IOperation} is, `IHttpLlmFunction` has converted every type
- * schema information from {@link OpenApi.IJsonSchema} to {@link ILlmSchemaV3} to
- * escape {@link OpenApi.IJsonSchema.IReference reference types}, and downgrade
- * the version of the JSON schema to OpenAPI 3.0. It's because LLM function call
- * feature cannot understand both reference types and OpenAPI 3.1
- * specification.
+ * schema information from {@link OpenApi.IJsonSchema} to {@link ILlmSchema}.
  *
  * Additionally, the properties' rule is:
  *
@@ -42,7 +38,7 @@ import { IValidation } from "./IValidation";
  * @author Jeongho Nam - https://github.com/samchon
  * @reference https://platform.openai.com/docs/guides/function-calling
  */
-export interface IHttpLlmFunction<Model extends ILlmSchema.Model> {
+export interface IHttpLlmFunction {
   /** HTTP method of the endpoint. */
   method: "get" | "post" | "patch" | "put" | "delete";
 
@@ -75,14 +71,14 @@ export interface IHttpLlmFunction<Model extends ILlmSchema.Model> {
    *
    * > - Example 1
    *
-   * >   - Path: `POST /shopping/sellers/sales`
-   * >   - Accessor: `shopping.sellers.sales.post`
+   * > - Path: `POST /shopping/sellers/sales`
+   * > - Accessor: `shopping.sellers.sales.post`
    * > - Example 2
    *
-   * >   - Endpoint: `GET
-   * >       /shoppings/sellers/sales/:saleId/reviews/:reviewId/comments/:id`
-   * >   - Accessor:
-   * >       `shoppings.sellers.sales.reviews.getBySaleIdAndReviewIdAndCommentId`
+   * > - Endpoint: `GET
+   * >   /shoppings/sellers/sales/:saleId/reviews/:reviewId/comments/:id`
+   * > - Accessor:
+   * >   `shoppings.sellers.sales.reviews.getBySaleIdAndReviewIdAndCommentId`
    *
    * @maxLength 64
    */
@@ -91,9 +87,9 @@ export interface IHttpLlmFunction<Model extends ILlmSchema.Model> {
   /**
    * List of parameter types.
    *
-   * If you've configured {@link IHttpLlmApplication.IOptions.keyword} as `true`,
+   * If you've configured {@link IHttpLlmApplication.IConfig.keyword} as `true`,
    * number of {@link IHttpLlmFunction.parameters} are always 1 and the first
-   * parameter's type is always {@link ILlmSchemaV3.IObject}. The properties'
+   * parameter's type is always {@link ILlmSchema.IObject}. The properties'
    * rule is:
    *
    * - `pathParameters`: Path parameters of {@link IHttpMigrateRoute.parameters}
@@ -119,15 +115,14 @@ export interface IHttpLlmFunction<Model extends ILlmSchema.Model> {
    * ];
    * ```
    */
-  parameters: ILlmSchema.ModelParameters[Model];
+  parameters: ILlmSchema.IParameters;
 
   /**
    * Collection of separated parameters.
    *
-   * Filled only when {@link IHttpLlmApplication.IOptions.separate} is
-   * configured.
+   * Filled only when {@link IHttpLlmApplication.IConfig.separate} is configured.
    */
-  separated?: IHttpLlmFunction.ISeparated<Model>;
+  separated?: IHttpLlmFunction.ISeparated;
 
   /**
    * Expected return type.
@@ -135,7 +130,7 @@ export interface IHttpLlmFunction<Model extends ILlmSchema.Model> {
    * If the target operation returns nothing (`void`), the `output` would be
    * `undefined`.
    */
-  output?: ILlmSchema.ModelSchema[Model] | undefined;
+  output?: ILlmSchema | undefined;
 
   /**
    * Description of the function.
@@ -144,8 +139,8 @@ export interface IHttpLlmFunction<Model extends ILlmSchema.Model> {
    *
    * 1. Starts with the {@link OpenApi.IOperation.summary} paragraph
    * 2. The next paragraphs are filled with the
-   *    {@link OpenApi.IOperation.description}. If the first
-   *    paragraph of {@link OpenApi.IOperation.description} matches the
+   *    {@link OpenApi.IOperation.description}. If the first paragraph of
+   *    {@link OpenApi.IOperation.description} matches the
    *    {@link OpenApi.IOperation.summary}, it is not duplicated
    * 3. Parameter descriptions are added with `@param` tags
    * 4. {@link OpenApi.IOperation.security Security requirements} are added with
@@ -158,8 +153,8 @@ export interface IHttpLlmFunction<Model extends ILlmSchema.Model> {
    * description to determine which function to call.
    *
    * Also, when the LLM converses with users, the `description` explains the
-   * function to the user. Therefore, the `description` property has the
-   * highest priority and should be carefully considered.
+   * function to the user. Therefore, the `description` property has the highest
+   * priority and should be carefully considered.
    */
   description?: string | undefined;
 
@@ -188,15 +183,15 @@ export interface IHttpLlmFunction<Model extends ILlmSchema.Model> {
    * types like `number` defined in the {@link parameters} schema, LLMs often
    * provide a `string` typed value instead.
    *
-   * In such cases, you should provide validation feedback to the LLM using
-   * this `validate` function. The `validate` function returns detailed
-   * information about type errors in the arguments.
+   * In such cases, you should provide validation feedback to the LLM using this
+   * `validate` function. The `validate` function returns detailed information
+   * about type errors in the arguments.
    *
    * Based on my experience, OpenAI's `gpt-4o-mini` model tends to construct
-   * invalid function calling arguments about 50% of the time on the first attempt.
-   * However, when corrected through this `validate` function, the success
-   * rate jumps to 99% on the second attempt, and I've never seen a failure
-   * on the third attempt.
+   * invalid function calling arguments about 50% of the time on the first
+   * attempt. However, when corrected through this `validate` function, the
+   * success rate jumps to 99% on the second attempt, and I've never seen a
+   * failure on the third attempt.
    *
    * > If you have {@link separated} parameters, use the
    * > {@link IHttpLlmFunction.ISeparated.validate} function instead when
@@ -231,17 +226,17 @@ export interface IHttpLlmFunction<Model extends ILlmSchema.Model> {
 }
 export namespace IHttpLlmFunction {
   /** Collection of separated parameters. */
-  export interface ISeparated<Model extends ILlmSchema.Model> {
+  export interface ISeparated {
     /**
      * Parameters that would be composed by the LLM.
      *
      * Even though no property exists in the LLM side, the `llm` property would
      * have at least empty object type.
      */
-    llm: ILlmSchema.ModelParameters[Model];
+    llm: ILlmSchema.IParameters;
 
     /** Parameters that would be composed by the human. */
-    human: ILlmSchema.ModelParameters[Model] | null;
+    human: ILlmSchema.IParameters | null;
 
     /**
      * Validate function for separated arguments.
@@ -259,10 +254,10 @@ export namespace IHttpLlmFunction {
      * > information about type errors in the arguments.
      *
      * > Based on my experience, OpenAI's `gpt-4o-mini` model tends to construct
-     * > invalid function calling arguments about 50% of the time on the first attempt.
-     * > However, when corrected through this `validate` function, the success
-     * > rate jumps to 99% on the second attempt, and I've never seen a failure
-     * > on the third attempt.
+     * > invalid function calling arguments about 50% of the time on the first
+     * > attempt. However, when corrected through this `validate` function, the
+     * > success rate jumps to 99% on the second attempt, and I've never seen a
+     * > failure on the third attempt.
      *
      * @param args Arguments to validate
      * @returns Validation result

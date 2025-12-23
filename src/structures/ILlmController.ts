@@ -1,5 +1,4 @@
 import { ILlmApplication } from "./ILlmApplication";
-import { ILlmSchema } from "./ILlmSchema";
 
 /**
  * Controller of LLM function calling.
@@ -25,11 +24,11 @@ import { ILlmSchema } from "./ILlmSchema";
  *     model: "gpt-4o-mini",
  *   },
  *   controllers: [
- *     typia.llm.controller<ReactNativeFileSystem, "chatgpt">(
+ *     typia.llm.controller<ReactNativeFileSystem>(
  *       "filesystem",
  *       new ReactNativeFileSystem(),
  *     ),
- *     typia.llm.controller<ReactNativeGallery, "chatgpt">(
+ *     typia.llm.controller<ReactNativeGallery>(
  *       "gallery",
  *       new ReactNativeGallery(),
  *     ),
@@ -48,15 +47,11 @@ import { ILlmSchema } from "./ILlmSchema";
  * - {@link IMcpLlmController} for MCP
  *
  * @author Jeongho Nam - https://github.com/samchon
- * @template Model Type of the LLM model
  * @template Class Class type of the function executor
  * @reference https://typia.io/docs/llm/controller/
  * @reference https://wrtnlabs.io/agentica/docs/core/controller/typescript/
  */
-export interface ILlmController<
-  Model extends ILlmSchema.Model,
-  Class extends object = any,
-> {
+export interface ILlmController<Class extends object = any> {
   /** Protocol discriminator. */
   protocol: "class";
 
@@ -64,7 +59,7 @@ export interface ILlmController<
   name: string;
 
   /** Application schema of function calling. */
-  application: ILlmApplication<Model, Class>;
+  application: ILlmApplication<Class>;
 
   /**
    * Executor of the class function.
