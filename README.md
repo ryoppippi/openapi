@@ -193,11 +193,11 @@ Turn your HTTP backend into an AI-callable service. `@samchon/openapi` converts 
     </tr>
     <tr>
       <td>Parameters</td>
-      <td colspan="3"><a href="https://samchon.github.io/openapi/api/interfaces/ILlmSchema.IParameters.html"><code>ILlmSchema.IParameters</code></a></td>
+      <td colspan="3" align="center"><a href="https://samchon.github.io/openapi/api/interfaces/ILlmSchema.IParameters.html"><code>ILlmSchema.IParameters</code></a></td>
     </tr>
     <tr>
       <td>Schema</td>
-      <td colspan="3"><a href="https://samchon.github.io/openapi/api/types/ILlmSchema.html"><code>ILlmSchema</code></a></td>
+      <td colspan="3" align="center"><a href="https://samchon.github.io/openapi/api/types/ILlmSchema.html"><code>ILlmSchema</code></a></td>
     </tr>
   </tbody>
 </table>
